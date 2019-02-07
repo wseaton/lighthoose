@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js",
+        "start": "http-server reports",
+        "scan": "node index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -13,6 +14,7 @@
     "dependencies": {
         "chrome-launcher": "^0.10.5",
         "fs-extra": "^7.0.1",
+        "http-server": "^0.11.1",
         "lighthouse": "^4.0.0",
         "log-timestamp": "^0.2.1",
         "node-fetch": "^2.3.0",
