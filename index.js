@@ -1,19 +1,28 @@
+require('log-timestamp');
+
+const path = require("path");
+
+const fs = require("fs-extra");
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 const fetch = require("node-fetch");
+const shell = require("shell-exec");
+
 const config = require("./config.js");
 
 async function main() {
+    console.log("requesting list of URLs to scan");
     const URLs = await fetchURLs();
 
-    console.log(URLs);
+    console.log(`received URLs: ${URLs.join(' ')}`);
+    console.log(`beginning scans`);
 
-    if (URLs && URLs[0]) {
-    }
+    const dateCmd = await shell("date +%Y-%m-%d_%H:%M:%S");
+    const date = dateCmd.stdout.trim().replace(/[^A-z0-9]/g,'_');
 
-    const results = await lighthoose("https://clayto.com");
-
-    console.log(JSON.stringify(results, null, 2));
+    // start all scans in parallel and wait for them to finish
+    let scanId = 0;
+    await Promise.all(URLs.map(url => lighthoose(url, date, ++scanId, config)));
 }
 
 async function fetchURLs() {
@@ -23,18 +32,35 @@ async function fetchURLs() {
     return text.split(/\s+/);
 }
 
-function lighthoose(url, opts = { chromeFlags: ["--headless"] }, config = null) {
-  return chromeLauncher.launch({chromeFlags: opts.chromeFlags}).then(chrome => {
-    opts.port = chrome.port;
-    return lighthouse(url, opts, config).then(results => {
-      // use results.lhr for the JS-consumeable output
-      // https://github.com/GoogleChrome/lighthouse/blob/master/types/lhr.d.ts
-      // use results.report for the HTML/JSON/CSV output as a string
-      // use results.artifacts for the trace/screenshots/other specific case you need (rarer)
-      return chrome.kill().then(() => results.lhr)
-    });
-  });
-}
 
+// The shell version
+async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--headless"] }) {
+
+    console.log(`scan ${scanId} starting on ${url}`);
+
+    const happyUrl = url.replace(/[^A-z0-9]/g,'_');
+    const outputDir = path.join(config.saveReportPath, happyUrl, date);
+    const outputPath = path.join(outputDir, "lighthoose");
+
+    // create reports dir
+    await fs.ensureDir(outputDir);
+
+    const cmd = [`./node_modules/.bin/lighthouse`,
+        `--chrome-flags="${opts.chromeFlags.join(" ")}"`,
+        `--output=json`,
+        `--output=html`,
+        `--output=csv`,
+        `--output-path=${outputPath}`,
+        `"${url}"`].join(" ");
+
+    try {
+        const cmdOut = await shell(cmd);
+    } catch (e) {
+        console.log(`could not run lighthouse`);
+        throw e;
+    }
+
+    console.log(`scan ${scanId} complete, report saved in ${outputDir}`);
+}
 
 main();

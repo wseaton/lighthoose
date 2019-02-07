@@ -12,7 +12,10 @@
     "license": "ISC",
     "dependencies": {
         "chrome-launcher": "^0.10.5",
+        "fs-extra": "^7.0.1",
         "lighthouse": "^4.0.0",
-        "node-fetch": "^2.3.0"
+        "log-timestamp": "^0.2.1",
+        "node-fetch": "^2.3.0",
+        "shell-exec": "^1.0.2"
     }
 }
