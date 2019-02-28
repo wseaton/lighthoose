@@ -1,4 +1,10 @@
-module.exports = {
-    docURL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcmjE6MGq9MAKGkXuoe1lSZh7p825zRDTio1iFX34-BLNUsUylLCPd7Of5UW3v7rW42AUUcdFCEUl6/pub?output=csv",
-    saveReportPath: "reports" // relative to lighthoose's root
-};
+const config = {
+    docURL: process.env.SHEET_URL,
+    saveReportPath: process.env.REPORT_DIR || "reports" // relative to lighthoose's root
+}
+
+if (!config.docURL) {
+    throw new Error("the SHEET_URL environment variable must be set");
+}
+
+module.exports = config;

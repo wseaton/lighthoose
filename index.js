@@ -34,19 +34,20 @@ async function fetchURLs() {
 
 
 // The shell version
-async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--headless"] }) {
+async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--headless", "--no-sandbox"] }) {
 
     console.log(`scan ${scanId} starting on ${url}`);
 
     const happyUrl = url.replace(/[^A-z0-9]/g,'_');
-    const outputDir = path.join(config.saveReportPath, happyUrl, date);
-    const outputPath = path.join(outputDir, "lighthoose");
+    const outputDir = path.resolve(config.saveReportPath, happyUrl, date);
+    const outputPath = path.resolve(outputDir, "lighthoose");
 
     // create reports dir
     await fs.ensureDir(outputDir);
 
     const cmd = [`./node_modules/.bin/lighthouse`,
         `--chrome-flags="${opts.chromeFlags.join(" ")}"`,
+        `--no-sandbox`,
         `--output=json`,
         `--output=html`,
         `--output=csv`,
