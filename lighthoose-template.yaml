@@ -1,0 +1,76 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: "lighthoose"
+  annotations:
+    description: "Description"
+# labels:
+#   app: "lighthoose"
+#   name: "lighthoose"
+objects:
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: "lighthoose"
+    annotations:
+      description: "Keeps track of changes in the application image"
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: lighthoose-build
+  spec:
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: "lighthoose:latest"
+    strategy:
+      dockerStrategy:
+        env:
+          - name: "SHEET_URL"
+            value: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcmjE6MGq9MAKGkXuoe1lSZh7p825zRDTio1iFX34-BLNUsUylLCPd7Of5UW3v7rW42AUUcdFCEUl6/pub?output=csv"
+        dockerfilePath: Dockerfile
+    source:
+      type: Git
+      git:
+        uri: "${SOURCE_REPOSITORY_URL}"
+- kind: "DeploymentConfig"
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: "lighthoose"
+  spec:
+    # selector:
+    #   app: lighthoose
+    #   deploymentconfig: lighthoose
+    template:
+      # metadata:
+      #   labels:
+      #     app: "lighthoose"
+      spec:
+        containers:
+          - name: "lighthoose"
+            image: "lighthoose:latest"
+            ports:
+              - containerPort: 8080
+                protocol: "TCP"
+    replicas: 1
+    triggers:
+      - type: "ConfigChange"
+      - type: "ImageChange"
+        imageChangeParams:
+          automatic: true
+          containerNames:
+            - "lighthoose"
+          from:
+            kind: "ImageStreamTag"
+            name: "lighthoose:latest"
+    strategy:
+      type: "Rolling"
+    paused: false
+    revisionHistoryLimit: 2
+    minReadySeconds: 0
+parameters:
+- name: SOURCE_REPOSITORY_URL
+  displayName: Source Repository URL
+  description: The URL of the repository with your application source code
+  value: https://github.com/redhataccess/lighthoose.git
+  required: true
