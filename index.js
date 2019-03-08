@@ -23,7 +23,14 @@ async function main() {
 
     // start all scans in parallel and wait for them to finish
     let scanId = 0;
-    await Promise.all(URLs.map(url => lighthoose(url, date, ++scanId, config)));
+
+    // Parallel
+    // await Promise.all(URLs.map(url => lighthoose(url, date, ++scanId, config)));
+
+    // Series
+    for (let url of URLs) {
+        await lighthoose(url, date, ++scanId, config);
+    }
 
     console.log(`all scans complete`);
     console.log(`compressing reports`);
