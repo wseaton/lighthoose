@@ -9,6 +9,7 @@ const fetch = require("node-fetch");
 const shell = require("shell-exec");
 
 const config = require("./config.js");
+const zipdirp = require("./zipdirp.js");
 
 async function main() {
     console.log("requesting list of URLs to scan");
@@ -23,6 +24,13 @@ async function main() {
     // start all scans in parallel and wait for them to finish
     let scanId = 0;
     await Promise.all(URLs.map(url => lighthoose(url, date, ++scanId, config)));
+
+    console.log(`all scans complete`);
+    console.log(`compressing reports`);
+
+    await compressReports();
+
+    console.log(`reports compressed`);
 }
 
 async function fetchURLs() {
@@ -62,6 +70,17 @@ async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--h
     }
 
     console.log(`scan ${scanId} complete, report saved in ${outputDir}`);
+}
+
+async function compressReports() {
+    const reportPath = path.join(__dirname, config.saveReportPath);
+    await zipdirp(
+        reportPath,
+        {
+            saveTo: path.join(reportPath, 'lighthoose-reports-all.zip'),
+            filter: path => !/\.zip$/.test(path) // don't include existing zip files
+        }
+    );
 }
 
 main();

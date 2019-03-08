@@ -18,6 +18,7 @@
         "lighthouse": "^4.0.0",
         "log-timestamp": "^0.2.1",
         "node-fetch": "^2.3.0",
-        "shell-exec": "^1.0.2"
+        "shell-exec": "^1.0.2",
+        "zip-dir": "^1.0.2"
     }
 }
