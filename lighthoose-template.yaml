@@ -17,7 +17,7 @@ objects:
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
-    name: lighthoose-build
+    name: lighthoose
   spec:
     output:
       to:
@@ -28,6 +28,8 @@ objects:
         env:
           - name: "SHEET_URL"
             value: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcmjE6MGq9MAKGkXuoe1lSZh7p825zRDTio1iFX34-BLNUsUylLCPd7Of5UW3v7rW42AUUcdFCEUl6/pub?output=csv"
+          - name: "REPORT_DIR"
+            value: "/reports"
         dockerfilePath: Dockerfile
     source:
       type: Git
@@ -38,20 +40,27 @@ objects:
   metadata:
     name: "lighthoose"
   spec:
-    # selector:
-    #   app: lighthoose
-    #   deploymentconfig: lighthoose
+    selector:
+      app: "lighthoose"
+      # deploymentconfig: lighthoose
     template:
-      # metadata:
-      #   labels:
-      #     app: "lighthoose"
+      metadata:
+        labels:
+          app: "lighthoose"
       spec:
         containers:
-          - name: "lighthoose"
+          - volumeMounts:
+            - mountPath: /reports
+              name: lighthoose
+            name: "lighthoose"
             image: "lighthoose:latest"
             ports:
               - containerPort: 8080
                 protocol: "TCP"
+        volumes:
+          - name: lighthoose
+            persistentVolumeClaim:
+              claimName: lighthoose
     replicas: 1
     triggers:
       - type: "ConfigChange"
@@ -68,6 +77,38 @@ objects:
     paused: false
     revisionHistoryLimit: 2
     minReadySeconds: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: lighthoose
+    name: lighthoose
+    namespace: lighthoose
+  spec:
+    ports:
+      - name: 8080-tcp
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+    selector:
+      app: lighthoose
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: lighthoose
+    name: lighthoose
+    namespace: lighthoose
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: lighthoose
+      weight: 100
+    wildcardPolicy: None
 parameters:
 - name: SOURCE_REPOSITORY_URL
   displayName: Source Repository URL
