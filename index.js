@@ -60,9 +60,17 @@ async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--h
     // create reports dir
     await fs.ensureDir(outputDir);
 
+    const onOpenshift = !!process.env.OPENSHIFT_BUILD_NAME;
+    const openshiftCpuSlowdownMultiplier=1;
+
+    if (onOpenshift) {
+        console.log(`detected openshift environment, setting CPU slowdown factor to ${1/openshiftCpuSlowdownMultiplier}`);
+    }
+
     const cmd = [`./node_modules/.bin/lighthouse`,
         `--chrome-flags="${opts.chromeFlags.join(" ")}"`,
         `--no-sandbox`,
+        onOpenshift ? `--throttling.cpuSlowdownMultiplier=${openshiftCpuSlowdownMultiplier}` : "",
         `--output=json`,
         `--output=html`,
         `--output=csv`,
