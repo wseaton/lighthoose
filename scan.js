@@ -90,7 +90,7 @@ async function lighthoose(url, date, scanId, config, opts = { chromeFlags: ["--h
 }
 
 async function compressReports() {
-    const reportPath = path.join(__dirname, config.saveReportPath);
+    const reportPath = path.resolve(__dirname, config.saveReportPath);
     await zipdirp(
         reportPath,
         {
