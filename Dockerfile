@@ -12,9 +12,10 @@ RUN echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repos
     nss@edge \
     && rm -rf /var/cache/*
 
-RUN git clone https://github.com/redhataccess/lighthoose.git /lighthoose
-
+RUN mkdir /lighthoose
 WORKDIR /lighthoose
+
+COPY . /lighthoose
 
 RUN npm install
 
