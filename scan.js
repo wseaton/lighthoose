@@ -14,24 +14,24 @@ const config = require("./config.js");
 const zipdirp = require("./zipdirp.js");
 
 async function scan() {
-  // console.log("starting lighthoose scan");
-  // const URLs = await fetchURLs();
+  console.log("starting lighthoose scan");
+  const URLs = await fetchURLs();
 
-  // console.log(`received URLs: ${URLs.join(' ')}`);
-  // console.log(`beginning scans`);
+  console.log(`received URLs: ${URLs.join(' ')}`);
+  console.log(`beginning scans`);
 
-  // const dateCmd = await shell("date +%Y-%m-%d_%H:%M:%S");
-  // const date = dateCmd.stdout.trim().replace(/[^A-z0-9]/g,'_');
+  const dateCmd = await shell("date +%Y-%m-%d_%H:%M:%S");
+  const date = dateCmd.stdout.trim().replace(/[^A-z0-9]/g,'_');
 
-  // for (let url of URLs) {
-  //     await lighthoose(url, date, config);
-  // }
+  for (let url of URLs) {
+      await lighthoose(url, date, config);
+  }
 
-  // console.log(`all scans complete`);
-  // console.log(`compressing reports`);
+  console.log(`all scans complete`);
+  console.log(`compressing reports`);
 
   await combineJSON();
-  // await compressReports();
+  await compressReports();
 
   console.log(`reports compressed`);
 }
@@ -92,7 +92,7 @@ async function lighthoose(
     throw e;
   }
 
-  console.log(`scan ${scanId} complete, report saved in ${outputDir}`);
+  console.log(`scan for ${url} complete, report saved.`);
 }
 
 async function combineJSON() {
