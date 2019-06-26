@@ -10,6 +10,7 @@ RUN echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repos
     chromium@edge \
     harfbuzz@edge \
     nss@edge \
+    freetype@edge \
     && rm -rf /var/cache/*
 
 RUN mkdir /lighthoose
